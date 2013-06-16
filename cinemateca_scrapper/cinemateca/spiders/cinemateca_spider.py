@@ -1,14 +1,14 @@
 from scrapy.spider import BaseSpider
 from scrapy.selector import HtmlXPathSelector
 from cinemateca.schedule import ScheduleItem
-from datetime import date as libdate
+from datetime import date, datetime
 
 class CinematecaSpider(BaseSpider):
 
     name = "cinemateca"
     allowed_domains = ["cinemateca.pt"]
 
-    def __init__(self, date=libdate.today().strftime("%Y-%m-%d")):
+    def __init__(self, date=date.today().strftime("%Y-%m-%d")):
         self.start_urls = ["http://www.cinemateca.pt/programacao.aspx?date=%s" % date]
 
     def parse_movies(self, div, schedule):
@@ -26,7 +26,9 @@ class CinematecaSpider(BaseSpider):
             for date_location in dates_locations:
                 item = ScheduleItem()
                 date, location = date_location.split("|")
-                item['date'] = date.strip(' \t\n\r')
+                date_obj = datetime.strptime(date.strip(' \t\n\r'), '%d-%m-%Y, %Hh%M')
+
+                item['date'] = date_obj.strftime('%Y-%m-%d %H:%M')
                 item['title'] = title.strip(' \t\n\r')
                 item['location'] = location.strip(' \t\n\r')
                 item['desc'] = desc.strip(' \t\n\r')
