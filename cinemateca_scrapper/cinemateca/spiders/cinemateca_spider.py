@@ -17,18 +17,18 @@ class CinematecaSpider(BaseSpider):
             title = movie.select('div[@class="infoTitleProg"]/text()').extract()[0]
             desc = ""
             for info in movie.select('div[@class="infoBiblio"]/text()').extract():
-                desc += info.encode('utf8').strip(' \t\n\r')
+                desc += info.strip(' \t\n\r')
                 desc += '\n'
             for info in movie.select('div[@class="infoText"]/p/text()').extract():
-                desc += info.encode('utf8').strip(' \t\n\r')
+                desc += info.strip(' \t\n\r')
                 desc += '\n'
             dates_locations = movie.select('div[@class="infoDate"]/text()').re('\d{,2}-\d{,2}-\d{4}, \d{,2}h\d{,2} \| .*')
             for date_location in dates_locations:
                 item = ScheduleItem()
                 date, location = date_location.split("|")
-                item['date'] = date.encode('utf8').strip(' \t\n\r')
-                item['title'] = title.encode('utf8').strip(' \t\n\r')
-                item['location'] = location.encode('utf8').strip(' \t\n\r')
+                item['date'] = date.strip(' \t\n\r')
+                item['title'] = title.strip(' \t\n\r')
+                item['location'] = location.strip(' \t\n\r')
                 item['desc'] = desc.strip(' \t\n\r')
                 items.append(item)
                 print item['date']

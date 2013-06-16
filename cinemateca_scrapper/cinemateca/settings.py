@@ -13,3 +13,7 @@ NEWSPIDER_MODULE = 'cinemateca.spiders'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'cinemateca (+http://www.yourdomain.com)'
+
+# ujson : exporter for utf8-encoded JSON
+FEED_EXPORTERS = {'ujson' : 'cinemateca.exporters.UnicodeJsonLinesItemExporter'}
+
