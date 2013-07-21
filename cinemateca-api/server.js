@@ -12,17 +12,17 @@ server.get('/test/:year/:month/:day', function(req, res, next){
 	var filename = req.params.year + '-' + req.params.month + '-' + req.params.day + '.json';
 	var filepath = process.env.HOME + '/events/' + filename;
 
-	console.log(filename);
+	console.log(filepath);
 
 	var returnLines = [];
 
 	//synchronous, temporary
 
-	if(!fs.existsSync('./'+filename)){
+	if(!fs.existsSync(filepath)){
 		return next(new restify.InternalError('file not found'));
 	}
 
-	fs.readFile(filepath, function(err, data) {
+	fs.readFile(filepath, 'utf8', function(err, data) {
 	    if(err) res.send(err);
 
 	    var array = data.toString().split("\n");
