@@ -26,9 +26,12 @@ server.get('/test/:year/:month/:day', function(req, res, next){
 	    if(err) res.send(err);
 
 	    var array = data.toString().split("\n");
+
 	    for(i in array) {
-	       	var jsonObj = JSON.parse(array[i].toString());
-	        returnLines.push(jsonObj);
+	    	if(array[i]){
+	       		var jsonObj = JSON.parse(array[i].toString());
+	        	returnLines.push(jsonObj);
+			}
 	    }
 	    res.send(
 			returnLines
@@ -36,6 +39,6 @@ server.get('/test/:year/:month/:day', function(req, res, next){
 	});
 })
 
-server.listen(3000, function(){
+server.listen(80, function(){
 	console.log('%s listening at %s', server.name, server.url);
 })
