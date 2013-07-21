@@ -9,28 +9,25 @@ server
 	.use(restify.bodyParser())
 
 server.get('/test/:year/:month/:day', function(req, res, next){
-	var filename = req.params.year + '_' + req.params.month + '_' + req.params.day + '.json';
-	
+	var filename = req.params.year + '-' + req.params.month + '-' + req.params.day + '.json';
+	var filepath = process.env.HOME + '/events/' + filename;
+
 	console.log(filename);
 
 	var returnLines = [];
 
 	//synchronous, temporary
-	
+
 	if(!fs.existsSync('./'+filename)){
 		return next(new restify.InternalError('file not found'));
 	}
 
-	fs.readFile('./'+filename, function(err, data) {
-		console.log('reading file');
-	    
+	fs.readFile(filepath, function(err, data) {
 	    if(err) res.send(err);
 
 	    var array = data.toString().split("\n");
 	    for(i in array) {
-	        console.log(array[i]);
 	       	var jsonObj = JSON.parse(array[i].toString());
-	        console.log(jsonObj);
 	        returnLines.push(jsonObj);
 	    }
 	    res.send(
