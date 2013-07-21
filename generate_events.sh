@@ -50,6 +50,10 @@ function generate() {
     file=${2}
     command="scrapy crawl cinemateca -t ujson -a date=${date} -o ${file}"
 
+    if [ -e ${file} ]; then
+        rm -f ${file}
+    fi
+
     ${command}
 }
 
