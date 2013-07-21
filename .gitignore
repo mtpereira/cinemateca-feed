@@ -1,2 +1,5 @@
 *.pyc
 output
+
+#Folders
+node_modules
