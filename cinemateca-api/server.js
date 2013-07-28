@@ -1,23 +1,45 @@
 var restify = require('restify');
-var lazy = require('lazy');
-var fs = require('fs');
+
+var mongodb = require('mongodb');
 
 var server = restify.createServer({name: 'cinemateca-api'});
 
 server
 	.use(restify.fullResponse())
-	.use(restify.bodyParser())
+	.use(restify.bodyParser());
 
-server.get('/test/:year/:month/:day', function(req, res, next){
+/*server.get('/all', funtion(){
+
+})*/
+
+server.get('/movies/:year/:month/:day', function(req, res, next){
 	var filename = req.params.year + '-' + req.params.month + '-' + req.params.day + '.json';
 	var filepath = process.env.HOME + '/events/' + filename;
 
-	console.log(filepath);
+	new mongodb.Db('scrapy', new mongodb.Server('localhost', 27017, {auto_reconnect: true})).open(function(err, db){
+		if(err){
+			console.log(err);
+		}
 
-	var returnLines = [];
+		db.collection('movies', function(error, collection){
+			if(err){
+				console.log(err);
+			}
 
+			var searchDate = req.params.year + '-' + req.params.month + '-' + req.params.day + 'T00:00:00.000Z';
+
+			console.log(searchDate);
+
+			collection.find({'date': { '$gt': searchDate}}).toArray(function(err, items){
+
+				res.send(items);
+			})
+		})
+	});
+
+	//return returnLines;
 	//synchronous, temporary
-
+	/*
 	if(!fs.existsSync(filepath)){
 		return next(new restify.InternalError('file not found'));
 	}
@@ -37,8 +59,9 @@ server.get('/test/:year/:month/:day', function(req, res, next){
 			returnLines
 		);
 	});
-})
+	*/
+});
 
-server.listen(80, function(){
+server.listen(8080, function(){
 	console.log('%s listening at %s', server.name, server.url);
-})
+});
