@@ -1,5 +1,7 @@
 *.pyc
 output
+*.swp
+*.un
 
 #Folders
 node_modules
