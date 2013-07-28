@@ -28,7 +28,8 @@ class CinematecaSpider(BaseSpider):
                 date, location = date_location.split("|")
                 date_obj = datetime.strptime(date.strip(' \t\n\r'), '%d-%m-%Y, %Hh%M')
 
-                item['date'] = date_obj.strftime('%Y-%m-%d %H:%M')
+                #item['datetime'] = date_obj.strftime('%Y-%m-%d %H:%M')
+                item['date'] = date_obj
                 item['title'] = title.strip(' \t\n\r')
                 item['location'] = location.strip(' \t\n\r')
                 item['desc'] = desc.strip(' \t\n\r')
