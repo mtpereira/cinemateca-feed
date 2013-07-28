@@ -14,6 +14,12 @@ function warn() {
     echo "[$(tput bold)$(tput setaf 3) WARNING $(tput sgr0)] ${*}"
 }
 
+function debug() {
+    if [ ${VERBOSE} -eq 1 ]; then
+        echo "[$(tput bold)$(tput setaf 5) DEBUG $(tput sgr0)] ${*}"
+    fi
+}
+
 function die() {
     echo "$(basename ${0}): ${*}"
     return 1
@@ -42,22 +48,32 @@ OPTIONS:
  -h             Shows this message
  -d             Number of days to generate
  -s             Start date in the format YYYY-MM-DD
+ -v             Be verbose
+ -S             Scrapy's crawler path
+ -P             Path to store events
+ -V             Virtualenv path
 EOF
 }
 
 function generate() {
-    date=${1:-$(date +%Y-%m-%d)}
-    file=${2}
-    command="scrapy crawl cinemateca -t ujson -a date=${date} -o ${file}"
-
-    if [ -e ${file} ]; then
-        rm -f ${file}
-    fi
+    local date=${1:-$(date +%Y-%m-%d)}
+    local file=${2:-./${date}.json}
+    local command="scrapy crawl cinemateca -t ujson -a date=${date} -o ${file}"
 
     ${command}
 }
 
-while getopts ":hd:s:" OPTION; do
+# next_date date inc
+# Returns date in 'inc' days from a specified date 'date'.
+function next_date() {
+    local date=${1:-$(date +%Y-%m-%d)}
+    local inc=${2:-1}
+
+    date --date "${date} ${inc} days" +%Y-%m-%d
+}
+
+VERBOSE=0
+while getopts ":hvd:s:P:S:V:" OPTION; do
         case ${OPTION} in
                 h)
                         usage
@@ -68,6 +84,18 @@ while getopts ":hd:s:" OPTION; do
                         ;;
                 s)
                         START=${OPTARG}
+                        ;;
+                P)
+                        EVENTS=${OPTARG}
+                        ;;
+                S)
+                        SCRAPY=${OPTARG}
+                        ;;
+                V)
+                        VENV=${OPTARG}
+                        ;;
+                v)
+                        VERBOSE=1
                         ;;
                 \?)
                         echo "Invalid option: -${OPTARG}" >&2
@@ -83,25 +111,32 @@ while getopts ":hd:s:" OPTION; do
         esac
 done
 
-# $ date --date "2013-07-01 10 days" +%Y-%m-%d
-# 2013-07-11
-START=${START:-$(date +%Y-%m-%d)}
-NUMDAYS=${NUMDAYS:-0}
-END=$(date --date "${START} ${NUMDAYS:-0} days" +%Y-%m-%d)
-echo $END
-
 # activate virtualenv for scrapy
-VENV="/srv/venvs/cinemateca-feed/"
-SCRAPY="/srv/git/cinemateca-feed/cinemateca_scrapper/"
-EVENTS="/var/www/events/"
+VENV=${VENV:-"/srv/venvs/cinemateca-feed/"}
+SCRAPY=${SCRAPY:-"/srv/git/cinemateca-feed/cinemateca_scrapper/"}
+EVENTS=${EVENTS:-"/var/www/events/"}
 set +u
 source ${VENV}/bin/activate
 set -u
 cd ${SCRAPY}
 
-for i in $(seq 1 ${NUMDAYS}); do
-    date=$(date --date "${START} ${i} days" +%Y-%m-%d)
-    echo ${date}
+#for i in $(seq 1 ${NUMDAYS}); do
+#    date=$(date --date "${START} ${i} days" +%Y-%m-%d)
+#    generate ${date} "${EVENTS}/${date}.json"
+#done
+
+# $ date --date "2013-07-01 10 days" +%Y-%m-%d
+# 2013-07-11
+START=${START:-$(date +%Y-%m-%d)}
+NUMDAYS=${NUMDAYS:-0}
+END=$(date --date "${START} ${NUMDAYS} days" +%Y-%m-%d)
+note "Generating events from ${START} to ${END}."
+
+date=${START}
+generate ${date} "${EVENTS}/${date}.json"
+while [ "${date}" != ${END} ]; do
     generate ${date} "${EVENTS}/${date}.json"
+    date=$(next_date ${date} 1)
+    debug "Next date: ${date}"
 done
 
