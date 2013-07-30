@@ -1,4 +1,4 @@
-A scraper to collect information about the <Cinemateca>[www.cinemateca.pt] program and an API to query for the information.
+A scraper to collect information about the [Cinemateca](www.cinemateca.pt) program and an API to query for the information.
 
 __Manually run the scraper__
 
