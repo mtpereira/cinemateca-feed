@@ -1,3 +1,6 @@
+from pytz import timezone
+import pytz
+
 from scrapy.spider import BaseSpider
 from scrapy.selector import HtmlXPathSelector
 from cinemateca.schedule import ScheduleItem
@@ -13,6 +16,8 @@ class CinematecaSpider(BaseSpider):
 
     def parse_movies(self, div, schedule):
         items = []
+        localtz = timezone('Europe/Lisbon');
+
         for movie in schedule.select('div[@class="%s"]' % div):
             title = movie.select('div[@class="infoTitleProg"]/text()').extract()[0]
             desc = ""
@@ -25,11 +30,14 @@ class CinematecaSpider(BaseSpider):
             dates_locations = movie.select('div[@class="infoDate"]/text()').re('\d{,2}-\d{,2}-\d{4}, \d{,2}h\d{,2} \| .*')
             for date_location in dates_locations:
                 item = ScheduleItem()
+                
+                # dates are stored in Lisbon timezone
                 date, location = date_location.split("|")
                 date_obj = datetime.strptime(date.strip(' \t\n\r'), '%d-%m-%Y, %Hh%M')
-
+                date_obj_aware = localtz.localize(date_obj); 
+                
                 #item['datetime'] = date_obj.strftime('%Y-%m-%d %H:%M')
-                item['date'] = date_obj
+                item['date'] = date_obj_aware
                 item['title'] = title.strip(' \t\n\r')
                 item['location'] = location.strip(' \t\n\r')
                 item['desc'] = desc.strip(' \t\n\r')
