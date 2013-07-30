@@ -42,10 +42,6 @@ class CinematecaSpider(BaseSpider):
                 item['location'] = location.strip(' \t\n\r')
                 item['desc'] = desc.strip(' \t\n\r')
                 items.append(item)
-                print item['date']
-                print item['title']
-                print item['location']
-                print item['desc']
         return items
 
     def parse(self, response):
