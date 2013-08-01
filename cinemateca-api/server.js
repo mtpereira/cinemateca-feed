@@ -31,6 +31,10 @@ server.get('/movies/:year/:month/:day', function(req, res, next){
 				,{} 
 				//,{explain:1}
 			).toArray(function(err, items){
+				res.header('Content-Type', 'application/json; charset=utf-8')
+
+				console.log(items);
+
 				res.send(items);
 			})
 		})
