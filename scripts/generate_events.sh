@@ -58,7 +58,7 @@ EOF
 function generate() {
     local date=${1:-$(date +%Y-%m-%d)}
     local file=${2:-./${date}.json}
-    local command="scrapy crawl cinemateca -t ujson -a date=${date} -o ${file}"
+    local command="scrapy crawl cinemateca -a date=${date}"
 
     ${command}
 }
@@ -113,7 +113,7 @@ done
 
 # activate virtualenv for scrapy
 VENV=${VENV:-"/srv/venvs/cinemateca-feed/"}
-SCRAPY=${SCRAPY:-"/srv/git/cinemateca-feed/cinemateca_scrapper/"}
+SCRAPY=${SCRAPY:-"/srv/git/cinemateca-feed/cinemateca-scraper/"}
 EVENTS=${EVENTS:-"/var/www/events/"}
 set +u
 source ${VENV}/bin/activate
