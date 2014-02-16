@@ -1,8 +1,8 @@
 FROM ubuntu
 MAINTAINER yourname
-RUN apt-get -y update
-RUN apt-get install -y python-yaml python-jinja2 git pip
-RUN pip install ansible
+RUN sudo apt-get -y update
+RUN sudo apt-get install -y python-yaml python-jinja2 git pip
+RUN sudo pip install ansible
 ADD deploy.yml ~/deploy.yml
 ADD inventory ~/inventory
 WORKDIR ~/
