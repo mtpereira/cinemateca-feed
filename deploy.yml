@@ -1,0 +1,48 @@
+---
+- hosts: all
+
+  tasks:
+    - name: deploy - install dependencies
+      apt: pkg={{ item }} state=latest update_cache=yes cache_valid_time=3600
+      with_items:
+        - python2.7
+        - npm
+        - python-virtualenv
+        - mongodb-server
+      sudo: yes
+
+    - name: create user
+      user: name=server group=server
+      sudo: yes
+
+    - name: deploy - create site directories
+      file: dest={{ item }} state=directory recursive=yes
+      with_items:
+        - /var/www/cinemateca-feed/cinemateca-api
+        - /srv/venvs/cinemateca-scraper
+        - /srv/git
+
+    - name: deploy - pull repository
+      git: repo=https://github.com/mtpereira/cinemateca-feed.git dest=/srv/git/
+
+    - name: deploy - symlink cinemateca-api
+      file: src=/srv/git/cinemateca-feed/cinemateca-api dest=/var/www/cinemateca-feed/cinemateca-api state=link
+
+    - name: deploy - install cinemateca-api
+      npm: path=/var/www/cinemateca-feed/cinemateca-api
+
+    - name: deploy - install cinemateca-scraper
+      pip: requirements=/var/www/cinemateca-feed/cinemateca-scraper virtualenv=/srv/virtualenv/cinemateca-scraper
+
+    - name: deploy - install init script
+      file: src=/srv/git/cinemateca-feed/scripts/cinemateca-feed dest=/etc/init.d/ owner=root group=root mode=755
+      sudo: yes
+      notify: deploy - start cinemateca-feed
+
+    - name: deploy - generate_events.sh in cron
+      cron: name="cinemateca-feed generate_events.sh" user=server minute=30 job="/srv/git/scripts/generate_events.sh"
+      sudo: yes
+
+  handlers:
+    - name: deploy - start cinemateca-feed
+      service: name=cinemateca-feed enabled=yes state=started
